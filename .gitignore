@@ -1,6 +1,6 @@
 # created by virtualenv automatically
 
-
+/.venv/*
 */__pycache__
 /instance/site.db
 */__pycache__
