@@ -38,7 +38,7 @@ import os
 import requests
 
 
-w3 = Web3(Web3.HTTPProvider("HTTP://127.0.0.1:7545"))
+w3 = Web3(Web3.HTTPProvider("http://172.16.64.202:7545"))
 assert True is w3.is_connected()
 # Load the contract bytecode and ABI from files
 with open("Chainforge/cbi.bin", "r") as f:
@@ -63,7 +63,7 @@ with open("Chainforge/contract.abi", "r") as f:
 
 # from web3.auto import w3
 contract_mi = w3.eth.contract(
-    abi=abi, bytecode=bytecode, address="0x7f3ADfA90E72dB0db6001d7113588b62190d375f"
+    abi=abi, bytecode=bytecode, address="0x82CBe65be22e4D0Aa6A70f4305b7e0a421d39b9F"
 )
 
 # # private_keys = {
