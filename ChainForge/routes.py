@@ -38,16 +38,32 @@ import os
 import requests
 
 
-w3 = Web3(Web3.HTTPProvider("HTTP://172.16.64.202:7545"))
+w3 = Web3(Web3.HTTPProvider("HTTP://127.0.0.1:7545"))
 assert True is w3.is_connected()
 # Load the contract bytecode and ABI from files
 with open("Chainforge/cbi.bin", "r") as f:
     bytecode = f.read()
 with open("Chainforge/contract.abi", "r") as f:
     abi = f.read()
+
+
+
+# # Create the contract in Python
+# contract = w3.eth.contract(abi=abi, bytecode=bytecode)
+
+# # Submit the transaction that deploys the contract
+# tx_hash = contract.constructor().transact({'from':w3.eth.accounts[0] })
+
+# # Wait for the transaction to be mined, and get the transaction receipt
+# tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+
+# print(f"Contract Deployed At: {tx_receipt.contractAddress}")
+
+
+
 # from web3.auto import w3
 contract_mi = w3.eth.contract(
-    abi=abi, bytecode=bytecode, address="0x2Be20494a09E12bE0b90b0f1e915Ae73084B69d4"
+    abi=abi, bytecode=bytecode, address="0x7f3ADfA90E72dB0db6001d7113588b62190d375f"
 )
 
 # # private_keys = {
@@ -64,7 +80,7 @@ private_keys=dict()
 
 Account.enable_unaudited_hdwallet_features()
 
-mnemonic_phrase = "program rug sustain wrestle rice crunch cactus pigeon mansion equal owner target"
+mnemonic_phrase = "access tag fatigue episode master carbon maze execute warfare jungle stem inside"
 
 accounts = w3.eth.accounts
 for i in range(len(accounts)):
@@ -295,20 +311,28 @@ def portfolio():
             signed_txn = account.sign_transaction(transaction)
 
             # Send the signed transaction to the network
-            tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-            print(f"Transaction sent: {tx_hash.hex()}")
+            
 
-            # Wait for the transaction to be mined
-            tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-            print(f"Transaction receipt: {tx_receipt}")
+            try:
+                tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+                print(f"Transaction sent: {tx_hash.hex()}")
 
-            # Assuming the event `ProjectCreated` is emitted, let's try to decode it
-            # This requires knowing the event signature and data structure
-            logs = contract_mi.events.ProjectCreated().processReceipt(tx_receipt)
-            for log in logs:
-                print(f"Project created with ID: {log.args.projectId}")
-                print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
-                    # print(art)
+                # Wait for the transaction to be mined
+                tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+                print(f"Transaction receipt: {tx_receipt}")
+
+                # Assuming the event `ProjectCreated` is emitted, let's try to decode it
+                # Th is requires knowing the event signature and data structure
+                logs = contract_mi.events.ProjectCreated().process_receipt(tx_receipt)
+                print(logs)
+                # for log in logs:
+                #     print(f"Project created with ID: {log.args.projectId}")
+                #     print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
+
+            except ValueError as e:
+                # Handle errors, e.g., revert reasons
+                print(f"Transaction failed: {e}")
+            # print(art)
             db.session.commit()
 
     elif request.method == "GET":
