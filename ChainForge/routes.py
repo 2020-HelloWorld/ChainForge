@@ -66,7 +66,7 @@ with open("Chainforge/contract.abi", "r") as f:
 
 # from web3.auto import w3
 contract_mi = w3.eth.contract(
-    abi=abi, bytecode=bytecode, address="0x5ba398B0957817418E2338E2fC2eb97f9D2b8DB2"
+    abi=abi, bytecode=bytecode, address="0x1C5Fd8e7a2D0adf27074f2f7D7BEDFfb6eaa3564"
 )
 
 # # private_keys = {
@@ -280,7 +280,7 @@ def portfolio():
             print(picture_file)
             
             art = Art(
-                id=contract_mi.functions.projectCount().call()+1,
+                # id=contract_mi.functions.projectCount().call()+1,
                  
                 title=form.title.data,
                 price=form.price.data,
@@ -334,6 +334,9 @@ def portfolio():
                 # Th is requires knowing the event signature and data structure
                 logs = contract_mi.events.ProjectCreated().process_receipt(tx_receipt)
                 print(logs)
+                if art.b_id==None:
+                    art.b_id=logs[0].args.id
+
                 # for log in logs:
                 #     print(f"Project created with ID: {log.args.projectId}")
                 #     print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
@@ -618,7 +621,12 @@ def dispute():
 
         path = "ChainForge/static/profile_pics/"
         print(your_image,their_image)
-        err=compare_images(path+your_image,path+their_image)
+        similarity_index=compare_images(path+your_image,path+their_image)
+
+        if similarity_index<=70:
+             flash(f"Dispute Resolve similarity:{similarity_index} is < 70%", "danger")
+             return redirect(url_for("dispute"))
+             
 
 
 
@@ -656,13 +664,16 @@ def dispute():
                 logs = contract_mi.events.copyrightProtected().process_receipt(tx_receipt)
                 print(logs)
 
-                if your_art.id < their_art.id:
+                if your_art.b_id < their_art.b_id:
                     db.session.delete(their_art)
                     db.session.commit()
+                    flash(f"Dispute Resolve similarity:{similarity_index}", "success")
+                    flash(f"Their post got deleted", "success")
                 else:
                     db.session.delete(your_art)
                     db.session.commit()
-                flash(f"Dispute Resolve similarity:{err}", "success")
+                    flash(f"Dispute Resolve similarity:{similarity_index}", "success")
+                    flash(f"Your post got deleted as if was uploaded later", "danger")
             # for log in logs:
             #     print(f"Project created with ID: {log.args.projectId}")
             #     print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")

@@ -41,6 +41,7 @@ class User(db.Model,UserMixin):
 
 class Art(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    b_id = db.Column(db.Integer,unique=True,nullable=True)
     image_file = db.Column(db.String(120), unique= True, nullable=False, default='entry.png')
     description = db.Column(db.String(120))
     title = db.Column(db.String(30),unique = True, nullable=False)
