@@ -39,7 +39,7 @@ import os
 import requests
 
 
-w3 = Web3(Web3.HTTPProvider("HTTP://192.168.181.67:7545"))
+w3 = Web3(Web3.HTTPProvider("HTTP://localhost:7545"))
 assert True is w3.is_connected()
 # Load the contract bytecode and ABI from files
 with open("Chainforge/cbi.bin", "r") as f:
@@ -64,7 +64,7 @@ with open("Chainforge/contract.abi", "r") as f:
 
 # from web3.auto import w3
 contract_mi = w3.eth.contract(
-    abi=abi, bytecode=bytecode, address="0xfbBf04a59475b3Ac13C2F2209236d944946fE3C8"
+    abi=abi, bytecode=bytecode, address="0x6fD97AFCea15ec11eBc4041e524A03323F482547"
 )
 
 # # private_keys = {
@@ -81,7 +81,7 @@ private_keys=dict()
 
 Account.enable_unaudited_hdwallet_features()
 
-mnemonic_phrase = "access tag fatigue episode master carbon maze execute warfare jungle stem inside"
+mnemonic_phrase = "sustain badge marriage celery green crush north answer clump soup grace multiply"
 
 accounts = w3.eth.accounts
 for i in range(len(accounts)):
