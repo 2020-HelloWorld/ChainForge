@@ -38,7 +38,7 @@ import os
 import requests
 
 
-w3 = Web3(Web3.HTTPProvider("HTTP://172.16.64.202:7545"))
+w3 = Web3(Web3.HTTPProvider("HTTP://127.0.0.1:7545"))
 assert True is w3.is_connected()
 # Load the contract bytecode and ABI from files
 with open("Chainforge/cbi.bin", "r") as f:
@@ -75,7 +75,7 @@ contract_mi = w3.eth.contract(
 #     0: "0x92d3b05f0707f7d13f42258111e76a4640091275c7a9ff20252eb950fe1963e8",
 # }
 acc = w3.eth.accounts
-private_keys = dict()
+private_keys=dict()
 
 
 Account.enable_unaudited_hdwallet_features()
@@ -87,12 +87,16 @@ for i in range(len(accounts)):
     path = f"m/44'/60'/0'/0/{i}"
     account = Account.from_mnemonic(mnemonic_phrase, account_path=path)
     private_key = account._private_key.hex()
-    private_keys[i+1] = private_key
+    private_keys[i+1]=private_key
     public_address = account.address
 
     print(f"Account {i}:")
-    print(f"Private key: {private_key}")
+    print(f"Private key: {private_key}")    
     print(f"Public address: {public_address}")
+
+
+
+
 
 
 print(private_keys)
@@ -206,8 +210,7 @@ def profile_picture(form_picture):
     # returns filename and extension filename not needed so
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
-    picture_path = os.path.join(
-        app.root_path, "static/profile_pics", picture_fn)
+    picture_path = os.path.join(app.root_path, "static/profile_pics", picture_fn)
 
     # to resize
     output_size = (125, 125)
@@ -235,8 +238,7 @@ def account():
     elif request.method == "GET":
         form.username.data = current_user.username
         form.email.data = current_user.email
-    image_file = url_for(
-        "static", filename="profile_pics/" + current_user.image_file)
+    image_file = url_for("static", filename="profile_pics/" + current_user.image_file)
     return render_template(
         "account.html", title="Account", image_file=image_file, form=form
     )
@@ -247,8 +249,7 @@ def save_picture(form_picture):
     # returns filename and extension filename not needed so
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
-    picture_path = os.path.join(
-        app.root_path, "static/profile_pics", picture_fn)
+    picture_path = os.path.join(app.root_path, "static/profile_pics", picture_fn)
 
     # to resize
 
@@ -320,13 +321,18 @@ def portfolio():
                 tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
                 print(f"Transaction receipt: {tx_receipt}")
 
-            # Assuming the event `ProjectCreated` is emitted, let's try to decode it
-            # This requires knowing the event signature and data structure
-            logs = contract_mi.events.ProjectCreated().processReceipt(tx_receipt)
-            for log in logs:
-                print(f"Project created with ID: {log.args.projectId}")
-                print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
-                    # print(art)
+                # Assuming the event `ProjectCreated` is emitted, let's try to decode it
+                # Th is requires knowing the event signature and data structure
+                logs = contract_mi.events.ProjectCreated().process_receipt(tx_receipt)
+                print(logs)
+                # for log in logs:
+                #     print(f"Project created with ID: {log.args.projectId}")
+                #     print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
+
+            except ValueError as e:
+                # Handle errors, e.g., revert reasons
+                print(f"Transaction failed: {e}")
+            # print(art)
             db.session.commit()
 
     elif request.method == "GET":
@@ -487,6 +493,8 @@ def receive_order():
             return redirect(url_for("receive_order"))
     elif request.method == "POST":
         id = request.form.get("id")
+        
+        
 
         ######
         if request.form.get("delete") == "delete":
