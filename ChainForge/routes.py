@@ -9,6 +9,7 @@ from flask import render_template, url_for, flash, redirect, request
 from ChainForge import app, db, bcrypt, mail
 import ast
 from ChainForge.compare_images import main as compare_images
+from ChainForge.add_watermark import add_watermark
 
 # forms
 from ChainForge.forms import (
@@ -65,7 +66,7 @@ with open("Chainforge/contract.abi", "r") as f:
 
 # from web3.auto import w3
 contract_mi = w3.eth.contract(
-    abi=abi, bytecode=bytecode, address="0xBB66630636C5bC359f7da2d3926f4De186AFc625"
+    abi=abi, bytecode=bytecode, address="0x5ba398B0957817418E2338E2fC2eb97f9D2b8DB2"
 )
 
 # # private_keys = {
@@ -82,7 +83,7 @@ private_keys=dict()
 
 Account.enable_unaudited_hdwallet_features()
 
-mnemonic_phrase = "wait kiss lift drill angle simple peace limit vendor zebra give december"
+mnemonic_phrase = "keen inquiry empty impose tourist grit ivory control reunion filter hello nothing"
 
 accounts = w3.eth.accounts
 for i in range(len(accounts)):
@@ -155,7 +156,7 @@ def register():
         ).build_transaction(
             {
                 "from": account.address,
-                "gas": 6721975,
+                "gas": 672197,
                 "gasPrice": 20000000000,
                 "nonce": nonce,
             }
@@ -274,8 +275,13 @@ def portfolio():
 
     if form.submit.data:
         if form.image.data:
+            path="ChainForge/static/profile_pics/"
             picture_file = save_picture(form.image.data)
+            print(picture_file)
+            
             art = Art(
+                id=contract_mi.functions.projectCount().call()+1,
+                 
                 title=form.title.data,
                 price=form.price.data,
                 description=form.description.data,
@@ -284,6 +290,7 @@ def portfolio():
             )
             db.session.add(art)
             db.session.commit()
+            add_watermark(path+picture_file)
             flash("Art Added", "success")
             return redirect(url_for("portfolio"))
 
@@ -414,6 +421,9 @@ def marketplace():
         return redirect(url_for("marketplace"))
     elif request.method == "GET":
         data = Art.query.filter_by(market=True)
+        # print(str(data))
+        for i in range(data.count()):
+             data[i].image_file=data[i].image_file.split(".")[0]+"_watermarked."+data[i].image_file.split(".")[1]
     return render_template("marketplace.html", title="marketplace", data=data)
 
 

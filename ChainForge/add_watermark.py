@@ -27,6 +27,5 @@ def add_watermark(image_path):
     draw.text((x, y), "Art for sale", fill=(255, 255, 255), font=font, anchor='mm')
 
     # Save the image with watermark
-    watermark_image.save(image_path+"_watermarked")  # Save as PNG to support transparency
+    watermark_image.save(image_path.split(".")[0]+"_watermarked."+image_path.split(".")[1])  # Save as PNG to support transparency
     
-    return image_path+"_watermarked"
