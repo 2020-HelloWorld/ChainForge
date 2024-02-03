@@ -7,6 +7,7 @@ from web3 import Account
 # from eth_account import Account
 from flask import render_template, url_for, flash, redirect, request
 from ChainForge import app, db, bcrypt, mail
+import ast
 
 # forms
 from ChainForge.forms import (
@@ -38,7 +39,7 @@ import os
 import requests
 
 
-w3 = Web3(Web3.HTTPProvider("HTTP://127.0.0.1:7545"))
+w3 = Web3(Web3.HTTPProvider("HTTP://192.168.181.67:7545"))
 assert True is w3.is_connected()
 # Load the contract bytecode and ABI from files
 with open("Chainforge/cbi.bin", "r") as f:
@@ -63,7 +64,7 @@ with open("Chainforge/contract.abi", "r") as f:
 
 # from web3.auto import w3
 contract_mi = w3.eth.contract(
-    abi=abi, bytecode=bytecode, address="0x82CBe65be22e4D0Aa6A70f4305b7e0a421d39b9F"
+    abi=abi, bytecode=bytecode, address="0xfbBf04a59475b3Ac13C2F2209236d944946fE3C8"
 )
 
 # # private_keys = {
@@ -348,13 +349,10 @@ def marketplace():
 
     if request.method == "POST":
         id = request.form.get("id")
-        art = Art.query.filter_by(id=id).first_or_404()
-
-        art.user_id = current_user.id
-
-        art.market = False
         account = Account.from_key(private_keys[current_user.id])
         nonce = w3.eth.get_transaction_count(account.address)
+        art = Art.query.filter_by(id=id).first_or_404()
+
 
         # Purchase
         transaction = contract_mi.functions.purchaseProject(int(id)).build_transaction(
@@ -366,16 +364,49 @@ def marketplace():
                 "nonce": nonce,
             }
         )
+        ####
         signed_txn = account.sign_transaction(transaction)
+        try:
+                tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+                print(f"Transaction sent: {tx_hash.hex()}")
 
-        # Send the signed transaction to the network
-        tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+                # Wait for the transaction to be mined
+                tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+                print(f"Transaction receipt: {tx_receipt}")
 
-        # Wait for the transaction to be mined
-        receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+                # Assuming the event `ProjectCreated` is emitted, let's try to decode it
+                # Th is requires knowing the event signature and data structure
+                logs = contract_mi.events.purchaseProject().process_receipt(tx_receipt)
+                print(logs)
 
-        # Print the transaction receipt
-        print(receipt)
+                
+                
+
+                art.user_id = current_user.id
+
+                art.market = False
+                # for log in logs:
+                #     print(f"Project created with ID: {log.args.projectId}")
+                #     print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
+
+        except ValueError as e:
+                
+                msg=ast.literal_eval(str(e))
+                # Handle errors, e.g., revert reasons
+                print(f"Transaction failed: {msg['message']}")
+                flash(f"Transaction failed: {msg['message']}","danger")
+
+        ####
+        
+
+        # # Send the signed transaction to the network
+        # tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+
+        # # Wait for the transaction to be mined
+        # receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+
+        # # Print the transaction receipt
+        # print(receipt)
 
         db.session.commit()
 
@@ -413,15 +444,34 @@ def send_order():
             }
         )
         signed_txn = account.sign_transaction(transaction)
+        try:
+            tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+            print(f"Transaction sent: {tx_hash.hex()}")
 
-        # Send the signed transaction to the network
-        tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+            # Wait for the transaction to be mined
+            tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+            print(f"Transaction receipt: {tx_receipt}")
 
-        # Wait for the transaction to be mined
-        receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+            # Assuming the event `ProjectCreated` is emitted, let's try to decode it
+            # Th is requires knowing the event signature and data structure
+            logs = contract_mi.events.createOrder().process_receipt(tx_receipt)
+            print(logs.args)
+        # for log in logs:
+        #     print(f"Project created with ID: {log.args.projectId}")
+        #     print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
 
-        # Print the transaction receipt
-        print(receipt)
+        except ValueError as e:
+                # Handle errors, e.g., revert reasons
+                print(f"Transaction failed: {e}")
+
+        # # Send the signed transaction to the network
+        # tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+        
+        # # Wait for the transaction to be mined
+        # receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+
+        # # Print the transaction receipt
+        # print(receipt)
         order = Order(
             title=form.title.data,
             description=form.description.data,
@@ -474,15 +524,34 @@ def receive_order():
                 }
             )
             signed_txn = account.sign_transaction(transaction)
+            try:
+                    tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+                    print(f"Transaction sent: {tx_hash.hex()}")
+
+                    # Wait for the transaction to be mined
+                    tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+                    print(f"Transaction receipt: {tx_receipt}")
+
+                    # Assuming the event `ProjectCreated` is emitted, let's try to decode it
+                    # Th is requires knowing the event signature and data structure
+                    logs = contract_mi.events.SubmitOrder().process_receipt(tx_receipt)
+                    print(logs.args)
+                # for log in logs:
+                #     print(f"Project created with ID: {log.args.projectId}")
+                #     print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
+
+            except ValueError as e:
+                    # Handle errors, e.g., revert reasons
+                    print(f"Transaction failed: {e}")
 
             # Send the signed transaction to the network
-            tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+            # tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
 
-            # Wait for the transaction to be mined
-            receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+            # # Wait for the transaction to be mined
+            # receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
-            # Print the transaction receipt
-            print(receipt)
+            # # Print the transaction receipt
+            # print(receipt)
             db.session.add(art)
             db.session.delete(order)
             db.session.commit()
