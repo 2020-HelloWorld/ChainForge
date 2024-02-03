@@ -131,7 +131,7 @@ class OrderAcceptForm(FlaskForm):
 
 
 class DisputeForm(FlaskForm):
-    your_id = IntegerField("Your id")
-    their_id = IntegerField("their id")
+    your_id = IntegerField("Your Art id")
+    their_id = IntegerField("Their Art id")
 
     submit = SubmitField("Dispute")

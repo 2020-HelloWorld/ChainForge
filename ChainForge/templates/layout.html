@@ -41,7 +41,21 @@
         .rhs {
           text-align: center;
         }
-    
+
+        .navbar.scrolled {
+          background-color: rgba(0, 0, 0, 1) !important;
+          transition: background-color 0.3s ease-in-out;
+        }
+
+        .navbar.scrolled a.nav-link {
+          color: white !important;
+          opacity: 0.7;
+        }
+
+        .navbar.scrolled .navbar-brand {
+          color: white !important;
+          opacity: 0.9;
+        }
     
         .login-btn {
           border-radius: 10px;
@@ -56,7 +70,13 @@
           box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
           transform: scale(1.05)
         }
-    
+        .rhs img {
+            transition: transform 0.5s ease-in-out; /* Add transition property */
+        }
+
+          .rhs img:hover {
+              transform: scale(1.1); /* Add scale transform on hover */
+          }
         .landing-container h2,
         .landing-container h5 {
           margin: 3em 0 3em 0;
@@ -87,6 +107,19 @@
         .signup-btn a:hover {
           color: #5e4bc0
         }
+        .modal-content {
+      color: black; /* Set the text color to black */
+    }
+
+    /* You can add more specific styles for form elements if needed */
+    .modal-content form label {
+      color: black; /* Set the label color to black */
+    }
+
+    .modal-content form input[type="text"],
+    .modal-content form textarea {
+      color: black; /* Set the input text color to black */
+    }
       </style>
     
 </head>
@@ -145,5 +178,15 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-</body>
+    <script>
+      // JavaScript to add transparent class to navbar when scrolled
+      $(window).scroll(function () {
+        if ($(document).scrollTop() > 50) {
+          $('.navbar').addClass('scrolled');
+        } else {
+          $('.navbar').removeClass('scrolled');
+        }
+      });
+    </script>
+  </body>
 </html>

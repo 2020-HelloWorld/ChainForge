@@ -64,7 +64,7 @@ with open("Chainforge/contract.abi", "r") as f:
 
 # from web3.auto import w3
 contract_mi = w3.eth.contract(
-    abi=abi, bytecode=bytecode, address="0x0ACCcD62B54239F1c319e60b59B5a5bD7c7Cd1f7"
+    abi=abi, bytecode=bytecode, address="0xBB66630636C5bC359f7da2d3926f4De186AFc625"
 )
 
 # # private_keys = {
@@ -81,7 +81,7 @@ private_keys=dict()
 
 Account.enable_unaudited_hdwallet_features()
 
-mnemonic_phrase = "acid pitch kit motor trophy tool exchange ribbon yard prison view increase"
+mnemonic_phrase = "wait kiss lift drill angle simple peace limit vendor zebra give december"
 
 accounts = w3.eth.accounts
 for i in range(len(accounts)):
