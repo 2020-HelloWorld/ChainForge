@@ -47,7 +47,7 @@ with open("Chainforge/contract.abi", "r") as f:
     abi = f.read()
 # from web3.auto import w3
 contract_mi = w3.eth.contract(
-    abi=abi, bytecode=bytecode, address="0x9eE2da3CB892Df60707550fd6cb8bEfeFcE4E88f"
+    abi=abi, bytecode=bytecode, address="0x2Be20494a09E12bE0b90b0f1e915Ae73084B69d4"
 )
 
 # # private_keys = {
@@ -296,7 +296,19 @@ def portfolio():
 
             # Send the signed transaction to the network
             tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-            # print(art)
+            print(f"Transaction sent: {tx_hash.hex()}")
+
+            # Wait for the transaction to be mined
+            tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+            print(f"Transaction receipt: {tx_receipt}")
+
+            # Assuming the event `ProjectCreated` is emitted, let's try to decode it
+            # This requires knowing the event signature and data structure
+            logs = contract_mi.events.ProjectCreated().processReceipt(tx_receipt)
+            for log in logs:
+                print(f"Project created with ID: {log.args.projectId}")
+                print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
+                    # print(art)
             db.session.commit()
 
     elif request.method == "GET":
