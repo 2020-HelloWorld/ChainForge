@@ -39,7 +39,7 @@ import os
 import requests
 
 
-w3 = Web3(Web3.HTTPProvider("HTTP://localhost:7545"))
+w3 = Web3(Web3.HTTPProvider("HTTP://172.16.64.202:7545"))
 assert True is w3.is_connected()
 # Load the contract bytecode and ABI from files
 with open("Chainforge/cbi.bin", "r") as f:
@@ -64,7 +64,7 @@ with open("Chainforge/contract.abi", "r") as f:
 
 # from web3.auto import w3
 contract_mi = w3.eth.contract(
-    abi=abi, bytecode=bytecode, address="0x6fD97AFCea15ec11eBc4041e524A03323F482547"
+    abi=abi, bytecode=bytecode, address="0x0ACCcD62B54239F1c319e60b59B5a5bD7c7Cd1f7"
 )
 
 # # private_keys = {
@@ -81,7 +81,7 @@ private_keys=dict()
 
 Account.enable_unaudited_hdwallet_features()
 
-mnemonic_phrase = "sustain badge marriage celery green crush north answer clump soup grace multiply"
+mnemonic_phrase = "acid pitch kit motor trophy tool exchange ribbon yard prison view increase"
 
 accounts = w3.eth.accounts
 for i in range(len(accounts)):
@@ -376,7 +376,7 @@ def marketplace():
 
                 # Assuming the event `ProjectCreated` is emitted, let's try to decode it
                 # Th is requires knowing the event signature and data structure
-                logs = contract_mi.events.purchaseProject().process_receipt(tx_receipt)
+                logs = contract_mi.events.ProjectPurchased().process_receipt(tx_receipt)
                 print(logs)
 
                 
@@ -393,7 +393,7 @@ def marketplace():
                 
                 msg=ast.literal_eval(str(e))
                 # Handle errors, e.g., revert reasons
-                print(f"Transaction failed: {msg['message']}")
+                print(f"Transaction failed: {msg}")
                 flash(f"Transaction failed: {msg['message']}","danger")
 
         ####
@@ -441,6 +441,7 @@ def send_order():
                 "gas": 6721975,
                 "gasPrice": 20000000000,
                 "nonce": nonce,
+                
             }
         )
         signed_txn = account.sign_transaction(transaction)
@@ -454,8 +455,8 @@ def send_order():
 
             # Assuming the event `ProjectCreated` is emitted, let's try to decode it
             # Th is requires knowing the event signature and data structure
-            logs = contract_mi.events.createOrder().process_receipt(tx_receipt)
-            print(logs.args)
+            logs = tx_receipt #contract_mi.events
+            print(logs)
         # for log in logs:
         #     print(f"Project created with ID: {log.args.projectId}")
         #     print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
@@ -463,6 +464,7 @@ def send_order():
         except ValueError as e:
                 # Handle errors, e.g., revert reasons
                 print(f"Transaction failed: {e}")
+                flash(f"Transaction failed: {e}","danger")
 
         # # Send the signed transaction to the network
         # tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
@@ -534,7 +536,7 @@ def receive_order():
 
                     # Assuming the event `ProjectCreated` is emitted, let's try to decode it
                     # Th is requires knowing the event signature and data structure
-                    logs = contract_mi.events.SubmitOrder().process_receipt(tx_receipt)
+                    logs = contract_mi.events.SentForApproval().process_receipt(tx_receipt)
                     print(logs.args)
                 # for log in logs:
                 #     print(f"Project created with ID: {log.args.projectId}")
@@ -591,13 +593,60 @@ def dispute():
 
         your_art = Art.query.filter_by(id=your).first()
 
-        if your_art.id < their_art.id:
-            db.session.delete(their_art)
-            db.session.commit()
-        else:
-            db.session.delete(your_art)
-            db.session.commit()
-        flash("Dispute Resolve", "success")
+        account = Account.from_key(private_keys[current_user.id])
+
+        nonce = w3.eth.get_transaction_count(account.address)
+
+        # Purchase
+        # rec_account = Account.from_key(private_keys[form.artist.data])
+
+        transaction = contract_mi.functions.copyrightClaim(
+            int(your ),int(their)
+        ).build_transaction(
+            {
+                "from": account.address,
+                # "value": int(int(form.price.data)*(10**18)),
+                "gas": 6721975,
+                "gasPrice": 20000000000,
+                "nonce": nonce,
+            }
+        )
+        signed_txn = account.sign_transaction(transaction)
+        try:
+                tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+                print(f"Transaction sent: {tx_hash.hex()}")
+
+                # Wait for the transaction to be mined
+                tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+                print(f"Transaction receipt: {tx_receipt}")
+
+                # Assuming the event `ProjectCreated` is emitted, let's try to decode it
+                # Th is requires knowing the event signature and data structure
+                logs = contract_mi.events.copyrightProtected().process_receipt(tx_receipt)
+                print(logs)
+
+                if your_art.id < their_art.id:
+                    db.session.delete(their_art)
+                    db.session.commit()
+                else:
+                    db.session.delete(your_art)
+                    db.session.commit()
+                flash("Dispute Resolve", "success")
+            # for log in logs:
+            #     print(f"Project created with ID: {log.args.projectId}")
+            #     print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
+
+        except ValueError as e:
+                # Handle errors, e.g., revert reasons
+                msg=ast.literal_eval(str(e))
+                # Handle errors, e.g., revert reasons
+                print(f"Transaction failed: {msg}")
+                flash(f"Transaction failed: {msg['message']}","danger")
+                
+
+
+        
+        
         return redirect(url_for("dispute"))
 
     return render_template("dispute.html", title="dispute", form=form)
