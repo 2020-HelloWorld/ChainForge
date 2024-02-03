@@ -8,6 +8,7 @@ from web3 import Account
 from flask import render_template, url_for, flash, redirect, request
 from ChainForge import app, db, bcrypt, mail
 import ast
+from ChainForge.compare_images import main as compare_images
 
 # forms
 from ChainForge.forms import (
@@ -584,6 +585,7 @@ def receive_order():
 @login_required
 def dispute():
     form = DisputeForm()
+    
 
     if form.validate():
         your = form.your_id.data
@@ -592,6 +594,25 @@ def dispute():
         their_art = Art.query.filter_by(id=their).first()
 
         your_art = Art.query.filter_by(id=your).first()
+
+        if not their_art:
+             flash("Enter valid project id of other party","danger")
+             return redirect(url_for("dispute"))
+        if not your_art:
+             flash("Enter your valid project id ","danger")
+             return redirect(url_for("dispute"))
+             
+
+        their_image=their_art.image_file
+        your_image=your_art.image_file
+
+        path = "ChainForge/static/profile_pics/"
+        print(your_image,their_image)
+        err=compare_images(path+your_image,path+their_image)
+
+
+
+
 
         account = Account.from_key(private_keys[current_user.id])
 
@@ -631,7 +652,7 @@ def dispute():
                 else:
                     db.session.delete(your_art)
                     db.session.commit()
-                flash("Dispute Resolve", "success")
+                flash(f"Dispute Resolve similarity:{err}", "success")
             # for log in logs:
             #     print(f"Project created with ID: {log.args.projectId}")
             #     print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
