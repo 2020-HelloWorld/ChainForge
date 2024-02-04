@@ -67,7 +67,7 @@ with open("Chainforge/contract.abi", "r") as f:
 
 # from web3.auto import w3
 contract_mi = w3.eth.contract(
-    abi=abi, bytecode=bytecode, address="0x376d9d672Ff90bf84265907419DE42A25CB2cC49"
+    abi=abi, bytecode=bytecode, address="0xa274F8dA0cA151b96E0BfcA7BeF3FBb35cEf560C"
 )
 
 # # private_keys = {
@@ -84,7 +84,7 @@ private_keys=dict()
 
 Account.enable_unaudited_hdwallet_features()
 
-mnemonic_phrase = "wealth horn guard program degree correct parrot weather forget front void pistol"
+mnemonic_phrase = "bomb dune regret youth corn slim gloom way normal special cable achieve"
 
 accounts = w3.eth.accounts
 for i in range(len(accounts)):
@@ -551,8 +551,8 @@ def receive_order():
 
                     # Assuming the event `ProjectCreated` is emitted, let's try to decode it
                     # Th is requires knowing the event signature and data structure
-                    logs = contract_mi.events.SentForApproval().process_receipt(tx_receipt)
-                    print(logs.args)
+                    # logs = contract_mi.events.SentForApproval().process_receipt(tx_receipt)
+                    # print(logs.args)
                 # for log in logs:
                 #     print(f"Project created with ID: {log.args.projectId}")
                 #     print(f"Project Name: {log.args.name}, Description: {log.args.description}, Price: {log.args.price}")
