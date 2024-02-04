@@ -67,7 +67,7 @@ with open("Chainforge/contract.abi", "r") as f:
 
 # from web3.auto import w3
 contract_mi = w3.eth.contract(
-    abi=abi, bytecode=bytecode, address="0xa274F8dA0cA151b96E0BfcA7BeF3FBb35cEf560C"
+    abi=abi, bytecode=bytecode, address="0xf876065A34a2150bE472C144B824f96344895506"
 )
 
 # # private_keys = {
@@ -84,7 +84,7 @@ private_keys=dict()
 
 Account.enable_unaudited_hdwallet_features()
 
-mnemonic_phrase = "bomb dune regret youth corn slim gloom way normal special cable achieve"
+mnemonic_phrase = "worth mom bonus toy gesture enforce deputy misery act convince jump strategy"
 
 accounts = w3.eth.accounts
 for i in range(len(accounts)):
@@ -656,18 +656,23 @@ def dispute():
                 receiver = None 
                 title = None 
                 id = None
-                
-                tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-                print(f"Transaction sent: {tx_hash.hex()}")
 
-                # Wait for the transaction to be mined
-                tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-                print(f"Transaction receipt: {tx_receipt}")
+                #Uncomment
+                
+                # tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+                # print(f"Transaction sent: {tx_hash.hex()}")
+
+                # # Wait for the transaction to be mined
+                # tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+                # print(f"Transaction receipt: {tx_receipt}")
 
                 # Assuming the event `ProjectCreated` is emitted, let's try to decode it
                 # Th is requires knowing the event signature and data structure
-                logs = contract_mi.events.copyrightProtected().process_receipt(tx_receipt)
-                print(logs)
+
+
+                #Uncomment
+                # logs = contract_mi.events.copyrightProtected().process_receipt(tx_receipt)
+                # print(logs)
 
                 if your_art.b_id < their_art.b_id:
                     db.session.delete(their_art)
