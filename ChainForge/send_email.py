@@ -6,7 +6,7 @@ SENDER = 'dreampath007@gmail.com'
 PASSWORD = 'zlfoppapmyyalavv'
 
 def send_email(receiver , title, id):
-    subject = "Your art work has been taken down!"
+    subject = f"Your art work {title} has been taken down!"
     body = f"""
     Dear user,
     We regret to inform you that your art work titled {title} with id {id} has been taken down from our platform due to copyright infringement.
